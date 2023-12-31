@@ -1,149 +1,144 @@
-# import pandas as pd
-# from sklearn.model_selection import train_test_split
-# from sklearn.preprocessing import StandardScaler, LabelEncoder
-# from sklearn.ensemble import RandomForestClassifier
-# from sklearn.metrics import classification_report
-# from sklearn.metrics import accuracy_score
-#
-# matches = pd.read_csv("output.csv", index_col=0)
-#
-# label_encoder = LabelEncoder()
-#
-# for column in matches.columns:
-#     if matches[column].dtype == 'object':  # Check if the column contains strings
-#         matches[column] = label_encoder.fit_transform(matches[column])
-#
-#
-# print(matches.head)
-#
-# train = matches.take([0, 3419])
-# test = matches.take([3420, 3799])
-# #train, test = train_test_split(matches, test_size=0.2, random_state=1)
-#
-#
-# predictors = ["HomeTeam", "HomeIsFromBigSix","HomeIsNewInPL","HomeRedCardsInLastMatch","AwayTeam","AwayIsFromBigSix", "AwayIsNewInPL","AwayRedCardsInLastMatch"]
-# rf = RandomForestClassifier(n_estimators=200, random_state=42)
-#
-# rf.fit(train[predictors], train["FullTimeResult"])
-# print(train[predictors])
-# print(test[predictors])
-#
-# preds = rf.predict(test[predictors])
-# error = classification_report(test["FullTimeResult"], preds)
-# print(error)
-#
-# accuracy = accuracy_score(test["FullTimeResult"], preds)
-# print("Accuracy Score:", accuracy)
-#
-# print("Unique labels in training data:", train["FullTimeResult"].unique())
-# print("Unique labels in test data:", test["FullTimeResult"].unique())
-#
-#
-#
-#
+# # preds = rf.predict(test[predictors])
+# # error = classification_report(test["FullTimeResult"], preds)
+# # print(error)
+# #
+# # accuracy = accuracy_score(test["FullTimeResult"], preds)
+# # print("Accuracy Score:", accuracy)
+# #
+# # print("Unique labels in training data:", train["FullTimeResult"].unique())
+# # print("Unique labels in test data:", test["FullTimeResult"].unique())
 # #
 # #
-# #
-# #
-# #
-# # # # X to dane liczbowe - wszystkie wiersze, wszystkie kolumny poza ostatnią
-# # # X = matches.values
-# # # # Y to etykiety, czyli przynależność do danego gatunku irysu
-# # # y = matches["FTR"]
-# # #
-# # # # konwersja etykiet w formie napisów na liczby
-# # # le = LabelEncoder()
-# # # y = le.fit_transform(y)
-# # #
-# # # # Wyświetlanie X i y
-# # # print(X)
-# # # print(y)
-# # #
-# # # # Normalizacja danych liczbowych
-# # # scaler = StandardScaler()
-# # # scaler.fit(X)
-# # # X = scaler.transform(X)
-# # #
-# # # # Dzielimy zbiór na 20% testowych i 80% trenujących
-# # # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20)
-# # #
-# # # # Wyświetlenie jak wyglądają teraz dane testowe po normalizacja
-# # # print(X_test)
-# # #
-# # # # Klasyfikacja używając metody RF dla 200 drzew
-# # # rf = RandomForestClassifier(n_estimators=200, random_state=42)
-# # #
-# # # # Dostarczenie klasyfikatorowi danych trenujących
-# # # rf.fit(X_train, y_train)
-# # #
-# # # # Predykcja wyników na podstawie danych testowych
-# # # y_pred = rf.predict(X_test)
-# # #
-# # # print(classification_report(y_test, y_pred))
+# # Generate a classification report with zero_division parameter set to 1
+# report = classification_report(y_test, y_pred, zero_division=1)
+# print("Classification Report:\n", report)
 #
+# # Create a DataFrame with details of predicted rows
+# predicted_df = test_data.copy()
+# predicted_df['True_Label'] = y_test
+# predicted_df['Predicted_Label'] = y_pred
 #
-#
-#
+# # Save the DataFrame to an XLS file
+# predicted_df.to_excel('predictions.xlsx', index=False)
+# print("Predictions saved to 'predictions.xlsx'")
+
+
+
+
+
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
+import joblib
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
 
 # Load the CSV file into a DataFrame
 df = pd.read_csv('output.csv')
 
 # Select the relevant columns for training and testing
-features = ['HomeTeam', 'AwayTeam', 'HomeIsFromBigSix', 'HomeIsNewInPL', 'HomeRedCardsInLastMatch',
-            'AwayIsFromBigSix', 'AwayIsNewInPL', 'AwayRedCardsInLastMatch']
-target = 'FullTimeResult'
+features = df.drop('FullTimeResult', axis=1)
+target = df['FullTimeResult']
+target.to_excel('target.xlsx', index=False)
 
-# Split the data into training (first 3420 rows) and testing (last 380 rows)
-train_data = df[:3420]
-test_data = df[-380:]
+# Convert categorical variables to numerical using one-hot encoding
+features = pd.get_dummies(features)
 
-# Check unique values in 'HomeTeam' and 'AwayTeam' columns for both training and test sets
-train_home_teams = set(train_data['HomeTeam'].unique())
-train_away_teams = set(train_data['AwayTeam'].unique())
-test_home_teams = set(test_data['HomeTeam'].unique())
-test_away_teams = set(test_data['AwayTeam'].unique())
+# Split the data into training and testing sets
+X_train = features.iloc[:3800, :]
+y_train = target.iloc[:3800]
 
-# Find missing categories in the test set and create a list of all unique categories
-unique_categories = list(train_home_teams.union(train_away_teams, test_home_teams, test_away_teams))
+X_test = features.iloc[-380:, :]
+y_test = target.iloc[-380:]
 
-# Combine 'HomeTeam' and 'AwayTeam' columns into one column for one-hot encoding
-combined_data = pd.concat([train_data[['HomeTeam', 'AwayTeam']], test_data[['HomeTeam', 'AwayTeam']]])
+# Save training data to Excel
+X_train.to_excel('X_train.xlsx', index=False)
+y_train.to_excel('y_train.xlsx', index=False)
 
-# Perform one-hot encoding on the combined data
-combined_encoded = pd.get_dummies(combined_data, columns=['HomeTeam', 'AwayTeam'], drop_first=True)
+# Save test data to Excel
+X_test.to_excel('X_test.xlsx', index=False)
+y_test.to_excel('y_test.xlsx', index=False)
 
-# Split the encoded data back into training and test sets
-X_train_encoded = combined_encoded[:len(train_data)]
-X_test_encoded = combined_encoded[len(train_data):]
+# Standardize the features
+# scaler = StandardScaler()
+# X_train_standardized = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
+# X_test_standardized = scaler.transform(X_test)
 
-# Split the data into features and target
-y_train = train_data[target]
-y_test = test_data[target]
-
+print("standarized")
 # Initialize and train a Random Forest classifier
-model = RandomForestClassifier(n_estimators=100, random_state=42)  # You can adjust n_estimators as needed
-model.fit(X_train_encoded, y_train)
+# best_model = RandomForestClassifier(n_estimators=150, random_state=42, max_depth=10, min_samples_leaf=4, min_samples_split=2)  # You can adjust n_estimators as needed
+# best_model.fit(X_train, y_train)
 
-# Make predictions on the test data
-y_pred = model.predict(X_test_encoded)
+import pandas as pd
 
-# Calculate accuracy on the test set
-accuracy = accuracy_score(y_test, y_pred)
-print(f"Accuracy on the test set: {accuracy * 100:.2f}%")
+# Assuming you have already loaded your data and preprocessed it as in your code
 
-# Generate a classification report with zero_division parameter set to 1
-report = classification_report(y_test, y_pred, zero_division=1)
-print("Classification Report:\n", report)
+# Concatenate the features and target into a single DataFrame
+all_data = pd.concat([features, target], axis=1)
 
-# Create a DataFrame with details of predicted rows
-predicted_df = test_data.copy()
-predicted_df['True_Label'] = y_test
-predicted_df['Predicted_Label'] = y_pred
+# Calculate the correlation matrix
+correlation_matrix = all_data.corr()
+# Save the entire correlation matrix to a file (e.g., CSV)
+correlation_matrix.to_csv('correlation_matrix.csv', header=True)
 
-# Save the DataFrame to an XLS file
-predicted_df.to_excel('predictions.xlsx', index=False)
-print("Predictions saved to 'predictions.xlsx'")
+
+
+from sklearn.feature_selection import mutual_info_classif
+from sklearn.preprocessing import LabelEncoder
+ # Encode the categorical target variable
+label_encoder = LabelEncoder()
+target_encoded = label_encoder.fit_transform(target)
+mutual_info_scores = mutual_info_classif(features, target_encoded)
+# Save mutual information scores to a CSV file
+mutual_info_df = pd.DataFrame({'Feature': features.columns, 'Mutual_Info_Score': mutual_info_scores})
+mutual_info_df.to_excel('mutual_info_scores.xlsx', index=False)
+
+# Hyperparameter tuning using Grid Search
+# from sklearn.model_selection import GridSearchCV
+#
+# param_grid = {
+#     'n_estimators': [50, 100, 150],
+#     'max_depth': [None, 10, 20],
+#     'min_samples_split': [2, 5, 10],
+#     'min_samples_leaf': [1, 2, 4]
+# }
+#
+# grid_search = GridSearchCV(RandomForestClassifier(random_state=42), param_grid, cv=5, scoring='accuracy')
+# grid_search.fit(X_train, y_train)
+#
+# best_model = grid_search.best_estimator_
+# print("Best Hyperparameters:", grid_search.best_params_)
+#
+# # Save the best trained model to a joblib file
+# joblib.dump(best_model, 'best_football_prediction_model.joblib')
+
+
+# Save the training data to an Excel file
+# pd.DataFrame(X_train).to_excel('X_train.xlsx', index=False)
+#
+# # Make predictions on the test data
+# predictions = best_model.predict(X_test)
+#
+# # Calculate accuracy on the test set
+# accuracy = accuracy_score(y_test, predictions)
+# print(f"Accuracy on the test set: {accuracy * 100:.2f}%")
+#
+# # Generate a classification report with zero_division parameter set to 1
+# report = classification_report(y_test, predictions, zero_division=1)
+# print("Classification Report:\n", report)
+#
+# # Create a DataFrame with details of predicted rows
+# predicted_df = X_test.copy()
+#
+# predicted_df['True_Label'] = y_test
+# predicted_df['Predicted_Label'] = predictions
+#
+# # Save the DataFrame to an XLS file
+# predicted_df.to_excel('predictions.xlsx', index=False)
+# print("Predictions saved to 'predictions.xlsx'")
+# #
+# # # Save the model details to an Excel file
+# # model_details = pd.DataFrame({'Feature': X_train.columns, 'Importance': best_model.feature_importances_})
+# # model_details.to_excel('model_details.xlsx', index=False)
