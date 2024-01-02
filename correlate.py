@@ -3,7 +3,7 @@ from sklearn.feature_selection import mutual_info_regression
 from sklearn.preprocessing import LabelEncoder
 
 # Load data from 'output.csv'
-data = pd.read_csv('output_for_corrmatrix.csv')
+data = pd.read_csv('output_for_correlation_matrix.csv')
 
 # # Label encode the categorical variable
 # label_encoder = LabelEncoder()
@@ -109,34 +109,52 @@ split_rows = len(correlation_matrix) // rows
 split_cols = len(correlation_matrix) // cols
 
 import numpy as np
-# Create individual plots for each sub-quadrant
-# for i in range(rows):
-#     for j in range(cols):
-#         start_row, end_row = i * split_rows, (i + 1) * split_rows
-#         start_col, end_col = j * split_cols, (j + 1) * split_cols
+#Create individual plots for each sub-quadrant
+for i in range(rows):
+    for j in range(cols):
+        start_row, end_row = i * split_rows, (i + 1) * split_rows
+        start_col, end_col = j * split_cols, (j + 1) * split_cols
+
+        # Extract the sub-quadrant
+        sub_matrix = correlation_matrix.iloc[start_row:end_row, start_col:end_col]
+
+        # Create a figure for each sub-quadrant
+        fig, ax = plt.subplots(figsize=(64, 64))  # Increase figure size
+        sns.heatmap(sub_matrix, annot=False, cmap='coolwarm', fmt=".2f", linewidths=.5, square=True, cbar=True)
+
+        # ax.set_xticks(np.arange(len(sub_matrix.columns)))
+        # ax.set_xticklabels(sub_matrix.columns)
+        # Rotate labels
+        # plt.xticks(rotation=45, ha='right')  # Adjust rotation and horizontal alignment as needed
+        # plt.yticks(rotation=0)
+
+
+        ax.set_xticklabels(sub_matrix.columns.map(custom_labels), ha='right')
+        ax.set_yticklabels(sub_matrix.index.map(custom_labels))
+
+
+
+        plt.tick_params(axis='both', which='both', labelsize=6)
+
+        # Save the plot to a file (adjust the filename as needed)
+        plt.savefig(f'sub_quadrant_{i + 1}_{j + 1}.png')
+        # Show the plot
+        plt.show()
+
+
+
+
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 #
-#         # Extract the sub-quadrant
-#         sub_matrix = correlation_matrix.iloc[start_row:end_row, start_col:end_col]
-#
-#         # Create a figure for each sub-quadrant
-#         fig, ax = plt.subplots(figsize=(64, 64))  # Increase figure size
-#         sns.heatmap(sub_matrix, annot=False, cmap='coolwarm', fmt=".2f", linewidths=.5, square=True, cbar=True)
-#
-#         # ax.set_xticks(np.arange(len(sub_matrix.columns)))
-#         # ax.set_xticklabels(sub_matrix.columns)
-#         # Rotate labels
-#         # plt.xticks(rotation=45, ha='right')  # Adjust rotation and horizontal alignment as needed
-#         # plt.yticks(rotation=0)
+# fig, ax = plt.subplots(figsize=(64, 64))  # Increase figure size
+# sns.heatmap(correlation_matrix, annot=False, cmap='coolwarm', fmt=".2f", linewidths=.5, square=True, cbar=True)
 #
 #
-#         ax.set_xticklabels(sub_matrix.columns.map(custom_labels), ha='right')
-#         ax.set_yticklabels(sub_matrix.index.map(custom_labels))
+# ax.set_xticklabels(correlation_matrix.columns, ha='right')
+# ax.set_yticklabels(correlation_matrix.index)
 #
 #
+# plt.tick_params(axis='both', which='both', labelsize=6)
 #
-#         plt.tick_params(axis='both', which='both', labelsize=6)
-#
-#         # Save the plot to a file (adjust the filename as needed)
-#         plt.savefig(f'sub_quadrant_{i + 1}_{j + 1}.png')
-#         # Show the plot
-#         plt.show()
+# plt.show()

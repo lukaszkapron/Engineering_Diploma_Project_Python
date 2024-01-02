@@ -16,6 +16,9 @@ np.random.seed(42)
 # Assuming df is your DataFrame with continuous and categorical variables
 X = df.drop("FullTimeResult", axis=1)  # Features
 X = X.drop("Id", axis=1)  # Features
+X = X.drop("Date", axis=1)  # Features
+X = X.drop("HomeTeam", axis=1)  # Features
+X = X.drop("AwayTeam", axis=1)  # Features
 X = X.drop("HomeTeamIsFromBigSix", axis=1)  # Features
 X = X.drop("AwayTeamIsFromBigSix", axis=1)  # Features
 X = X.drop("HomeTeamIsNewInPL", axis=1)  # Features
@@ -69,7 +72,6 @@ sns.heatmap(corr, annot=False, cmap='coolwarm', fmt=".2f", linewidths=.5, square
 
 ax.set_xticklabels(corr.columns, ha='right')
 ax.set_yticklabels(corr.index)
-
 
 
 plt.tick_params(axis='both', which='both', labelsize=6)
