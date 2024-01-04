@@ -49,26 +49,24 @@ X_test_transformed = preprocessor.transform(X_test)
 
 
 # Create a parameter grid for GridSearchCV
-param_grid = {
-    'C': [0.1, 1, 10, 100, 1000],
-    'kernel': ['linear', 'rbf', 'poly'],
-    'gamma': ['scale', 'auto']
-}
-
+param_grid = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
+                     'C': [1, 10, 100, 1000]},
+                    {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
 # Create and train the SVM model with GridSearchCV
+# svm_model = GridSearchCV(SVC(), param_grid, cv=5)
+
 svm_model = SVC()
-grid_search = GridSearchCV(svm_model, param_grid, cv=5, scoring='accuracy', n_jobs=-1)
-grid_search.fit(X_train_transformed, y_train)
+svm_model.fit(X_train_transformed, y_train)
 
 # Get the best hyperparameters
-best_params = grid_search.best_params_
-print(f'Best Hyperparameters: {best_params}')
+# best_params = svm_model.best_params_
+# print(f'Best Hyperparameters: {best_params}')
 
 # Get the best SVM model
-best_svm_model = grid_search.best_estimator_
+# best_svm_model = svm_model.best_estimator_
 
 # Make predictions on the test set using the best model
-y_pred = best_svm_model.predict(X_test_transformed)
+y_pred = svm_model.predict(X_test_transformed)
 
 # Print accuracy and classification report
 accuracy = accuracy_score(y_test, y_pred)
