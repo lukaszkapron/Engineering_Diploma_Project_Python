@@ -32,15 +32,42 @@ y_test = target.iloc[-380:]
 # X_test.to_excel('X_test.xlsx', index=False)
 # y_test.to_excel('y_test.xlsx', index=False)
 
-# Standardize the features
-scaler = StandardScaler()
-X_train_standardized = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
-X_test_standardized = scaler.transform(X_test)
 
-#
-# # Initialize and train a Random Forest classifier
-# best_model = RandomForestClassifier(n_estimators=150, random_state=42, max_depth=10, min_samples_leaf=4, min_samples_split=2)  # You can adjust n_estimators as needed
+
+rfmodel = RandomForestClassifier(random_state=42)
+n_estimators = [50, 100, 150, 200, 500]
+max_features = ['sqrt']
+max_depth = [5, 10, 20]
+max_depth.append(None)
+min_samples_split = [2, 5, 10]
+min_samples_leaf = [1, 2, 4]
+
+
+for n in n_estimators:
+    for depth in max_depth:
+        for split in min_samples_split:
+            for leaf in min_samples_leaf:
+                rfmodel.min_samples_leaf = leaf
+                rfmodel.min_samples_split = split
+                rfmodel.max_depth = depth
+                rfmodel.n_estimators=n
+                rfmodel.fit(X_train, y_train)
+                predictions = rfmodel.predict(X_test)
+                accuracy = accuracy_score(y_test, predictions)
+                print(f"Accuracy on the test set: {accuracy * 100:.2f}%")
+                print(f"n: {rfmodel.n_estimators}, max_depth: {rfmodel.max_depth}, min_samples_split: {rfmodel.min_samples_split}, min_samples_leaf {rfmodel.min_samples_leaf}")
+
+# best_model = RandomForestClassifier(n_estimators=50, random_state=42, max_depth=None, min_samples_leaf=4, min_samples_split=10)  # You can adjust n_estimators as needed
 # best_model.fit(X_train, y_train)
+# predictions = best_model.predict(X_test)
+# accuracy = accuracy_score(y_test, predictions)
+# print(f"Accuracy on the test set: {accuracy * 100:.2f}%")
+# report = classification_report(y_test, predictions, zero_division=1)
+# print("Classification Report:\n", report)
+
+
+
+
 
 
 #Hyperparameter tuning using Grid Search
@@ -124,31 +151,31 @@ X_test_standardized = scaler.transform(X_test)
 
 
 
-import itertools
-from sklearn.model_selection import cross_val_score
-import numpy as np
-param_grid = {
-    'n_estimators': [50, 100, 150, 200, 500],
-    'max_depth': [None, 10, 20],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4]
-}
-
-
-# Wszystkie kombinacje parametrów
-param_combinations = list(itertools.product(*param_grid.values()))
-
-# Definicja modelu Random Forest
-random_forest = RandomForestClassifier()
-
-# Przeszukiwanie wszystkich kombinacji parametrów
-for params in param_combinations:
-    param_dict = dict(zip(param_grid.keys(), params))
-    random_forest.set_params(**param_dict)
-
-    # Użycie cross_val_score do oceny modelu
-    scores = cross_val_score(random_forest, X_train, y_train, cv=5)
-    mean_score = np.mean(scores)
-
-    # Wyświetlanie kombinacji parametrów i skuteczności
-    print(f"Parametry: {param_dict}, Skuteczność: {mean_score}")
+# import itertools
+# from sklearn.model_selection import cross_val_score
+# import numpy as np
+# param_grid = {
+#     'n_estimators': [50, 100, 150, 200, 500],
+#     'max_depth': [None, 10, 20],
+#     'min_samples_split': [2, 5, 10],
+#     'min_samples_leaf': [1, 2, 4]
+# }
+#
+#
+# # Wszystkie kombinacje parametrów
+# param_combinations = list(itertools.product(*param_grid.values()))
+#
+# # Definicja modelu Random Forest
+# random_forest = RandomForestClassifier()
+#
+# # Przeszukiwanie wszystkich kombinacji parametrów
+# for params in param_combinations:
+#     param_dict = dict(zip(param_grid.keys(), params))
+#     random_forest.set_params(**param_dict)
+#
+#     # Użycie cross_val_score do oceny modelu
+#     scores = cross_val_score(random_forest, X_train, y_train, cv=5)
+#     mean_score = np.mean(scores)
+#
+#     # Wyświetlanie kombinacji parametrów i skuteczności
+#     print(f"Parametry: {param_dict}, Skuteczność: {mean_score}")
