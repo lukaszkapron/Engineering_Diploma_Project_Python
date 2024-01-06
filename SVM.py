@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, multilabel_confusion_matrix, precision_score,recall_score, f1_score
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler
 from sklearn.compose import ColumnTransformer
 
@@ -45,15 +45,14 @@ y_test = target.iloc[-380:]
 # pd.DataFrame(X_train).to_excel('X_train_transformed.xlsx', index=False)
 # pd.DataFrame(X_test).to_excel('X_test_transformed.xlsx', index=False)
 
-kernel = ['poly', 'rbf', 'sigmoid']
-gamma = [1, 0.1, 0.01, 0.001, 0.0001, 0.0001]
-gamma.append('scale')
-gamma.append('auto')
-c = [0.1, 1, 10, 100, 1000]
-degree = (2, 3, 4)
+kernel = ['rbf']
+gamma = [0.1]
+
+c = [0.1]
+degree = [2]
 decision_function_shape = ['ovo', 'ovr']
 
-svm_model = SVC(random_state=42)
+svm_model = SVC(random_state=42, class_weight='balanced')
 for x in c:
     for shape in decision_function_shape:
         for kern in kernel:
@@ -69,14 +68,40 @@ for x in c:
                     accuracy = accuracy_score(y_test, predictions)
                     print(f"Accuracy on the test set: {accuracy * 100:.2f}%")
                     print(f"c: {svm_model.c}, decision_function_shape: {svm_model.decision_function_shape}, kernel: {svm_model.kernel}, gamma {svm_model.gamma}, degree: {svm_model.degree}")
-
-# best_model = SVC(random_state=42, kernel='rbf', C=1)
+                    matrix = confusion_matrix(y_test, predictions)
+                    print("Confusion matrix:\n", matrix)
+                    matrix = multilabel_confusion_matrix(y_test, predictions)
+                    print("multilabel_confusion_matrix matrix:\n", matrix)
+                    f1score = f1_score(y_test, predictions, average='weighted')
+                    print(f"f1score on the test set: {f1score * 100:.2f}%")
+                    report = classification_report(y_test, predictions, zero_division=1)
+                    print("Classification Report:\n", report)
+from sklearn.model_selection import cross_val_score
+# best_model = SVC(random_state=42, kernel='rbf', C=0.1, degree=2, decision_function_shape='ovo', gamma=0.1, class_weight='balanced')
+# # cross_val_scores = cross_val_score(best_model, X_train, y_train, cv=10)  # Adjust the number of folds as needed
+# # # Print cross-validation scores
+# # print("Cross-Validation Scores:", cross_val_scores)
+# # print("Mean Cross-Validation Score:", cross_val_scores.mean())
+#
 # best_model.fit(X_train, y_train)
 # predictions = best_model.predict(X_test)
 # accuracy = accuracy_score(y_test, predictions)
 # print(f"Accuracy on the test set: {accuracy * 100:.2f}%")
 # report = classification_report(y_test, predictions, zero_division=1)
 # print("Classification Report:\n", report)
+# matrix = confusion_matrix(y_test, predictions)
+# print("Confusion matrix:\n", matrix)
+# matrix = multilabel_confusion_matrix(y_test, predictions)
+# print("multilabel_confusion_matrix matrix:\n", matrix)
+# f1score = f1_score(y_test, predictions, average='weighted')
+# print(f"f1score on the test set: {f1score * 100:.2f}%")
+
+
+
+
+
+
+
 #Hyperparameter tuning using Grid Search
 # svm_model.fit(X_train, y_train)
 #
