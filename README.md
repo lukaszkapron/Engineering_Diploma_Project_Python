@@ -38,5 +38,6 @@ Użyte technologie:
 
 Uwaga: zmienne użyte w procesie predykcji zostały przygotowane na podstawie zbioru danych dostępnego pod adresem:
 - https://www.football-data.co.uk/englandm.php
+
 Dane zostały przekształcone przeze mnie używając język programowania c#. Projekt jest dostępny pod adresem:
 - https://github.com/lukaszkapron/Engineering_Diploma_Project_Csharp
